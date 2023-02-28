@@ -3,6 +3,9 @@
 <head>
     <title>JavaScript Snake</title>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         * {
             margin: 0;
@@ -18,11 +21,17 @@
             background: white;
         }
     </style>
+
+    <script defer src="script.js"></script>
 </head>
-
 <body>
-    <canvas id="gP"></canvas>
+    <canvas id="canvas"></canvas>
 
-    <script src="script.js"></script>
+    <script>
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+
+        alert("To control the snake, use the arrows on the keyboard.");
+    </script>
 </body>
 </html>

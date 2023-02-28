@@ -1,66 +1,69 @@
-let gP = document.getElementById('gP'),
-	g = gP.getContext('2d'),
-	sBody = null,
-	d = 1,
-	a = null,
-	s = 25; 
+let canvas    = document.getElementById("canvas"),
+	ctx       = canvas.getContext("2d"),
+	snakeBody = [{x: 0, y: 0}],
+	direction = 1,
+	apple     = null,
+	size      = 25;
 
-let rand = function (min, max) {
-	k = Math.floor(Math.random() * (max - min) + min);
-	return (Math.round( k / s) * s);
-}
-
-let newA = function () {
-		a = [rand(0, innerWidth), rand(0, innerHeight)];
-	},
-	newB = function () {
-		sBody = [{x: 0, y: 0}];
-	}
-
-newB(); newA();
-gP.width = innerWidth;
-gP.height = innerHeight;
+setNewApple();
 
 setInterval(() => {
-	if (a[0] + s >= gP.width || a[1] + s >= gP.height) newA(); 
+	if ((apple[0] + size >= canvas.width) || (apple[1] + size >= canvas.height)) setNewApple(); 
             
-	g.clearRect(0, 0, gP.width, gP.height);
-	g.fillStyle = "red";
-	g.fillRect(...a, s, s);
-	g.fillStyle = "#000";
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "red";
+	ctx.fillRect(...apple, size, size);
+	ctx.fillStyle = "#000";
 
-	sBody.forEach(function(el, i) {
-		if (el.x == sBody[sBody.length - 1].x && el.y == sBody[sBody.length - 1].y && i < sBody.length - 1) {
-			sBody.splice(0, sBody.length - 1), sBody = [{x:0, y:0}], d = 1;
+	snakeBody.forEach((el, i) => {
+		if ((el.x == snakeBody[snakeBody.length - 1].x) && (el.y == snakeBody[snakeBody.length - 1].y) && (i < snakeBody.length - 1)) {
+			snakeBody = [{x: 0, y: 0}], direction = 1;
+
+			alert("You lose.");
 		}
 	});
 
-	let m = sBody[0], f = {x: m.x, y: m.y}, l = sBody[sBody.length - 1];
-	if (d == 1)  f.x = l.x + s, f.y = Math.round(l.y / s) * s;
-	if (d == 2) f.y = l.y + s, f.x = Math.round(l.x / s) * s;
-	if (d == 3) f.x = l.x - s, f.y = Math.round(l.y / s) * s;
-	if (d == 4) f.y = l.y - s, f.x = Math.round(l.x / s) * s;
-	sBody.push(f);
-	sBody.splice(0,1);
+	let firstSegment = snakeBody[0], 
+		lastSegment = snakeBody[snakeBody.length - 1], 
+		nextSegment = {x: firstSegment.x, y: firstSegment.y};
 
-	sBody.forEach(function(pob, i) {
-		if (d == 1) if (pob.x > Math.round(gP.width / s) * s) pob.x = 0;
-		if (d == 2) if (pob.y > Math.round(gP.height / s) * s) pob.y = 0;
-		if (d == 3) if (pob.x < 0) pob.x = Math.round(gP.width / s) * s;
-		if (d == 4) if (pob.y < 0) pob.y = Math.round(gP.height / s) * s;
-		if (pob.x == a[0] && pob.y == a[1]) newA(), sBody.unshift({x: f.x - s, y: l.y});
+	if (direction == 1)  nextSegment.x = lastSegment.x + size, nextSegment.y = Math.round(lastSegment.y / size) * size;
+	if (direction == 2) nextSegment.y = lastSegment.y + size, nextSegment.x = Math.round(lastSegment.x / size) * size;
+	if (direction == 3) nextSegment.x = lastSegment.x - size, nextSegment.y = Math.round(lastSegment.y / size) * size;
+	if (direction == 4) nextSegment.y = lastSegment.y - size, nextSegment.x = Math.round(lastSegment.x / size) * size;
 
-		g.fillRect(pob.x, pob.y, s, s);
+	snakeBody.push(nextSegment);
+	snakeBody.splice(0, 1);
+
+	snakeBody.forEach(segment => {
+		if (direction == 1) if (segment.x > Math.round(canvas.width / size) * size) segment.x = 0;
+		if (direction == 2) if (segment.y > Math.round(canvas.height / size) * size) segment.y = 0;
+		if (direction == 3) if (segment.x < 0) segment.x = Math.round(canvas.width / size) * size;
+		if (direction == 4) if (segment.y < 0) segment.y = Math.round(canvas.height / size) * size;
+
+		if (segment.x == apple[0] && segment.y == apple[1]) setNewApple(), snakeBody.unshift({x: firstSegment.x - size, y: lastSegment.y - size});
+
+		ctx.fillRect(segment.x, segment.y, size, size);
 	});
-}, 1000 / 20);
+}, 50);
 
 window.onkeydown = function (e) {
-	let k = e.keyCode;
+	let keyCode = e.keyCode;
 
-	if ([38,39,40,37].indexOf(k) >= 0) e.preventDefault();
+	if ([37, 38, 39, 40].indexOf(keyCode) >= 0) e.preventDefault();
 
-	if (k == 39 && d != 3) d = 1;
-	if (k == 40 && d != 4) d = 2;
-	if (k == 37 && d != 1) d = 3;
-	if (k == 38 && d != 2) d = 4;
+	if (keyCode == 39 && direction != 3) direction = 1;
+	if (keyCode == 40 && direction != 4) direction = 2;
+	if (keyCode == 37 && direction != 1) direction = 3;
+	if (keyCode == 38 && direction != 2) direction = 4;
 };
+
+function getRandomCoordinate(min, max) {
+	coordinate = Math.floor(Math.random() * (max - min) + min);
+
+	return Math.round(coordinate / size) * size;
+}
+
+function setNewApple() {
+	apple = [getRandomCoordinate(0, innerWidth), getRandomCoordinate(0, innerHeight)];
+}
